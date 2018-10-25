@@ -57,7 +57,7 @@ public class rocketbot extends ListenerAdapter {
             }
 
             if (text.toLowerCase().equals("`design")) {
-                e.getChannel().sendMessage("https://drive.google.com/drive/folders/1QyXzrti_QxNV9VVWOpVtQOTD-uIYZT3H?usp=sharing").complete();
+                e.getChannel().sendMessage("<design google drive>").complete();
             }
 
             if (text.toLowerCase().equals("`openrocket")) {
