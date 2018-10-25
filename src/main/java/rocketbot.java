@@ -76,12 +76,12 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("Paint", "In order to launch at finals, must be painted (5 point penalty if no paint)", false);
                 bldr.addField("Motor", "F Class or lower, can use any number as long as impulse does not exceed 80 N*s", false);
                 bldr.addField("Payload", "Three Raw Hen Eggs, 55 - 61 grams, 45 millimeters or less, must return with no external damage", false);
+                bldr.addField("Paracute", "Portion containing egg and altimeter must separate and descend with at least 2 parachutes", false);
                 bldr.addField("Flight Duration", "43 - 45 seconds, starting from lift-off", false);
                 bldr.addField("Flight Altitude", "856 feet", false);
 
                 e.getChannel().sendMessage(bldr.build()).complete();
             }
-
         }
     }
 }
