@@ -57,7 +57,7 @@ public class rocketbot extends ListenerAdapter {
             }
 
             if (text.toLowerCase().equals("`design")) {
-                e.getChannel().sendMessage("<design google drive>").complete();
+                e.getChannel().sendMessage("https://drive.google.com/drive/folders/1VyfCM0iVXL6kgiEmuVzHwDHMf_pGTJyB?usp=sharing").complete();
             }
 
             if (text.toLowerCase().equals("`openrocket")) {
@@ -76,11 +76,20 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("Paint", "In order to launch at finals, must be painted (5 point penalty if no paint)", false);
                 bldr.addField("Motor", "F Class or lower, can use any number as long as impulse does not exceed 80 N*s", false);
                 bldr.addField("Payload", "Three Raw Hen Eggs, 55 - 61 grams, 45 millimeters or less, must return with no external damage", false);
-                bldr.addField("Paracute", "Portion containing egg and altimeter must separate and descend with at least 2 parachutes", false);
+                bldr.addField("Parachute", "Portion containing egg and altimeter must separate and descend with at least 2 parachutes", false);
                 bldr.addField("Flight Duration", "43 - 45 seconds, starting from lift-off", false);
                 bldr.addField("Flight Altitude", "856 feet", false);
+                bldr.addField("Flight Altitde According to Erin", "856 meters", false);
 
                 e.getChannel().sendMessage(bldr.build()).complete();
+            }
+
+            if (name.equals("Urdenwaz")) {
+                if (text.toLowerCase().equals("release the hounds")) {
+                    for (int i = 0; i < 1; i--) {
+                        e.getChannel().sendMessage("<@userid>").complete();
+                    }
+                }
             }
         }
     }
