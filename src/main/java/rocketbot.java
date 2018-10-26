@@ -11,8 +11,13 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class rocketbot extends ListenerAdapter {
+
+    private List<String> design;
 
     public static void main(String[] args) throws LoginException, IOException {
         try (BufferedReader rdr = new BufferedReader(new FileReader("token.txt"))) {
@@ -23,6 +28,15 @@ public class rocketbot extends ListenerAdapter {
                     .build();
             String invite = jda.asBot().getInviteUrl();
             System.out.println(invite);
+        }
+    }
+
+    public rocketbot() throws IOException {
+        BufferedReader rdr2 = new BufferedReader(new FileReader("designfolder.txt"));
+        design = new ArrayList<>();
+        String line;
+        while ((line = rdr2.readLine()) != null) {
+            design.add(line.trim());
         }
     }
 
@@ -57,7 +71,7 @@ public class rocketbot extends ListenerAdapter {
             }
 
             if (text.toLowerCase().equals("`design")) {
-                e.getChannel().sendMessage("https://drive.google.com/drive/folders/1VyfCM0iVXL6kgiEmuVzHwDHMf_pGTJyB?usp=sharing").complete();
+                e.getChannel().sendMessage(design.get(0)).complete();
             }
 
             if (text.toLowerCase().equals("`openrocket")) {
@@ -79,7 +93,7 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("Parachute", "Portion containing egg and altimeter must separate and descend with at least 2 parachutes", false);
                 bldr.addField("Flight Duration", "43 - 45 seconds, starting from lift-off", false);
                 bldr.addField("Flight Altitude", "856 feet", false);
-                bldr.addField("Flight Altitde According to Erin", "856 meters", false);
+                bldr.addField("Flight Altitude According to Erin", "856 meters", false);
 
                 e.getChannel().sendMessage(bldr.build()).complete();
             }
@@ -87,7 +101,7 @@ public class rocketbot extends ListenerAdapter {
             if (name.equals("Urdenwaz")) {
                 if (text.toLowerCase().equals("release the hounds")) {
                     for (int i = 0; i < 1; i--) {
-                        e.getChannel().sendMessage("<@userid>").complete();
+                        e.getChannel().sendMessage("<message>").complete();
                     }
                 }
             }
