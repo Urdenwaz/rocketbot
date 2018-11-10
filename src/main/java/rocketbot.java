@@ -2,17 +2,16 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
 
 public class rocketbot extends ListenerAdapter {
 
@@ -39,6 +38,9 @@ public class rocketbot extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
         String text = e.getMessage().getContentStripped();
         String name = e.getAuthor().getName();
+        String userId = e.getAuthor().getId();
+        Message message = e.getMessage();
+        Guild guild = e.getGuild();
 
         if (name.toLowerCase().equals("rocketbot")) {
 
@@ -56,6 +58,9 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("r!specs", "TARC Rocket Specifications", false);
                 bldr.addField("r!design", "Link to Current OpenRocket Design", false);
                 bldr.addField("r!openrocket", "Link to OpenRocket", false);
+                bldr.addBlankField(false);
+                bldr.addField("People who Zak decides only:", "(Erin, Eugenia, Zak)", false);
+                bldr.addField("r!hounds <mentionedUser>", "Releases the hounds", false);
 
                 e.getChannel().sendMessage(bldr.build()).complete();
             }
@@ -97,13 +102,18 @@ public class rocketbot extends ListenerAdapter {
                 e.getChannel().sendMessage("https://cdn.discordapp.com/emojis/410317239859019776.gif?v=1").complete();
             }
 
-//            if (name.equals("Urdenwaz")) {
-//                if (text.toLowerCase().contains("`hounds")) {
-//                    for (int i = 0; i > 1; i--) {
-//                        e.getChannel().sendMessage("<@385299359581077506>").complete();
-//                    }
-//                }
-//            }
+            if (userId.equals("191367988224458752") || userId.equals("323331293787979781") || userId.equals("502619027122946048")) {
+                if (text.toLowerCase().startsWith("r!hounds")) {
+                    List<User> mentionedUsers = message.getMentionedUsers();
+                    for (User user : mentionedUsers) {
+                        Member member = guild.getMember(user);
+                        String id = member.getUser().getId();
+                        for (int i = 0; i < 10; i++) {
+                            e.getChannel().sendMessage("<@" + id + ">").complete();
+                        }
+                    }
+                }
+            }
         }
     }
 }
