@@ -8,16 +8,18 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
+import java.util.HashSet;
 import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Set;
 
 public class rocketbot extends ListenerAdapter {
 
-    private String design;
+    private String design; // allows for design bufferedreader
 
-    public static void main(String[] args) throws LoginException, IOException {
+    public static void main(String[] args) throws LoginException, IOException { // creates bot, should be left untouched
         try (BufferedReader rdr = new BufferedReader(new FileReader("token.txt"))) {
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(rdr.readLine())
@@ -29,18 +31,30 @@ public class rocketbot extends ListenerAdapter {
         }
     }
 
-    public rocketbot() throws IOException {
+    public rocketbot() throws IOException { // reads file so I don't put our design folder online again
         BufferedReader rdr2 = new BufferedReader(new FileReader("designfolder.txt"));
         design = rdr2.readLine();
     }
 
+    public Set trusteds() { // bot permissions
+        Set set = new HashSet<String>();
+
+        set.add("191367988224458752"); // Zak
+        set.add("323331293787979781"); // Erin
+        set.add("502619027122946048"); // Eugenia
+        set.add("318874242450063371"); // Aaryea
+
+        return set;
+    }
+
     @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+    public void onGuildMessageReceived(GuildMessageReceivedEvent e) { // receives a message
         String text = e.getMessage().getContentStripped();
         String name = e.getAuthor().getName();
         String userId = e.getAuthor().getId();
         Message message = e.getMessage();
         Guild guild = e.getGuild();
+        Set trusted = trusteds();
 
         if (name.toLowerCase().equals("rocketbot")) {
 
@@ -59,7 +73,7 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("r!design", "Link to Current OpenRocket Design", false);
                 bldr.addField("r!openrocket", "Link to OpenRocket", false);
                 bldr.addBlankField(false);
-                bldr.addField("People who Zak decides only:", "(Erin, Eugenia, Zak)", false);
+                bldr.addField("People who Zak decides only:", "(Erin, Eugenia, Zak, Aaryea)", false);
                 bldr.addField("r!hounds <mentionedUser>", "Releases the hounds", false);
 
                 e.getChannel().sendMessage(bldr.build()).complete();
@@ -102,14 +116,18 @@ public class rocketbot extends ListenerAdapter {
                 e.getChannel().sendMessage("https://cdn.discordapp.com/emojis/410317239859019776.gif?v=1").complete();
             }
 
-            if (userId.equals("191367988224458752") || userId.equals("323331293787979781") || userId.equals("502619027122946048")) {
+            if (trusted.contains(userId)) {
                 if (text.toLowerCase().startsWith("r!hounds")) {
                     List<User> mentionedUsers = message.getMentionedUsers();
                     for (User user : mentionedUsers) {
                         Member member = guild.getMember(user);
                         String id = member.getUser().getId();
-                        for (int i = 0; i < 10; i++) {
-                            e.getChannel().sendMessage("<@" + id + ">").complete();
+                        if (id.equals("191367988224458752")) {
+                            e.getChannel().sendMessage("You dare release the hounds upon their creator? Foolish.").complete();
+                        } else {
+                            for (int i = 0; i < 10; i++) {
+                                e.getChannel().sendMessage("<@" + id + ">").complete();
+                            }
                         }
                     }
                 }
