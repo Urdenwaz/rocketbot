@@ -8,14 +8,16 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class rocketbot extends ListenerAdapter {
+
+    private List<Prompt> prompts;
 
     private String design; // allows for design bufferedreader
 
@@ -34,6 +36,12 @@ public class rocketbot extends ListenerAdapter {
     public rocketbot() throws IOException { // reads file so I don't put our design folder online again
         BufferedReader rdr2 = new BufferedReader(new FileReader("designfolder.txt"));
         design = rdr2.readLine();
+
+        String types[] = { "twe", "eval", "disc" };
+        prompts = new ArrayList<>();
+        for (int i = 0; i < types.length; i++) {
+            prompts.add(new Prompt(types[i]));
+        }
     }
 
     public Set trusteds() { // bot permissions
@@ -72,6 +80,7 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("r!specs", "TARC Rocket Specifications", false);
                 bldr.addField("r!design", "Link to Current OpenRocket Design", false);
                 bldr.addField("r!openrocket", "Link to OpenRocket", false);
+                bldr.addField("WIP: r!paper3 <twe, eval, disc>", "Generate a Paper 3 Prompt", false);
                 bldr.addBlankField(false);
                 bldr.addField("People who Zak decides only:", "(Erin, Eugenia, Zak, Aaryea)", false);
                 bldr.addField("r!hounds <mentionedUser>", "Releases the hounds", false);
@@ -80,8 +89,7 @@ public class rocketbot extends ListenerAdapter {
             }
 
             if (text.toLowerCase().equals("r!rqdoc")) {
-                e.getChannel().sendMessage("__**TARC Requirements Doc:**__").complete();
-                e.getChannel().sendMessage("https://3384f12ld0l0tjlik1fcm68s-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/Event-Rules-TARC-2019-FINAL.pdf").complete();
+                e.getChannel().sendMessage("__**TARC Requirements Doc:**__ \nhttps://3384f12ld0l0tjlik1fcm68s-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/Event-Rules-TARC-2019-FINAL.pdf").complete();
             }
 
             if (text.toLowerCase().equals("r!design")) {
@@ -112,8 +120,25 @@ public class rocketbot extends ListenerAdapter {
                 e.getChannel().sendMessage(bldr.build()).complete();
             }
 
+            if (text.toLowerCase().equals("r!imperial")) {
+                e.getChannel().sendMessage("打倒美帝国主义").complete();
+            }
+
             if (text.toLowerCase().equals("f")) {
                 e.getChannel().sendMessage("https://cdn.discordapp.com/emojis/410317239859019776.gif?v=1").complete();
+            }
+
+            if (text.toLowerCase().startsWith("r!paper3 ")) {
+                String[] tokens = text.split(" ");
+                if (tokens.length > 2) {
+                    String msg = Arrays.stream(tokens).skip(2).collect(Collectors.joining(" "));
+                    String prompttype = (tokens.length >= 2) ? tokens[1] : "ERROR";
+                    for (Prompt prompt : prompts) {
+                        if (prompt.isPrompt(prompttype)) {
+                            e.getChannel().sendMessage("\"" + msg + "\" " + "\n" + "\n" + prompt.getPrompt()).complete();
+                        }
+                    }
+                }
             }
 
             if (trusted.contains(userId)) {
