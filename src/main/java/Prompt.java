@@ -4,6 +4,7 @@ public class Prompt {
 
     public Prompt(String prompt) {
         this.prompt = prompt;
+        System.out.println("Prompt " + prompt + " loaded");
     }
 
     public boolean isPrompt(String prompt) {
@@ -11,16 +12,17 @@ public class Prompt {
     }
 
     public String getPrompt() {
+        String promptFull = "";
         if (prompt.equalsIgnoreCase("twe")) {
-            prompt = "To what extent do you agree with this statement?";
+            promptFull = "To what extent do you agree with this statement?";
         }
         if (prompt.equalsIgnoreCase("disc")) {
-            prompt = "Discuss.";
+            promptFull = "Discuss.";
         }
         if (prompt.equalsIgnoreCase("eval")) {
-            prompt = "Evaluate.";
+            promptFull = "Evaluate.";
         }
-        return prompt;
+        return promptFull;
     }
 
 }

@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 public class rocketbot extends ListenerAdapter {
 
     private List<Prompt> prompts;
-
     private String design; // allows for design bufferedreader
+    private static final String gloriousCreator = "191367988224458752";
 
     public static void main(String[] args) throws LoginException, IOException { // creates bot, should be left untouched
         try (BufferedReader rdr = new BufferedReader(new FileReader("token.txt"))) {
@@ -47,7 +47,7 @@ public class rocketbot extends ListenerAdapter {
     public Set trusteds() { // bot permissions
         Set set = new HashSet<String>();
 
-        set.add("191367988224458752"); // Zak
+        set.add(gloriousCreator); // Zak
         set.add("323331293787979781"); // Erin
         set.add("502619027122946048"); // Eugenia
         set.add("318874242450063371"); // Aaryea
@@ -80,7 +80,7 @@ public class rocketbot extends ListenerAdapter {
                 bldr.addField("r!specs", "TARC Rocket Specifications", false);
                 bldr.addField("r!design", "Link to Current OpenRocket Design", false);
                 bldr.addField("r!openrocket", "Link to OpenRocket", false);
-                bldr.addField("WIP: r!paper3 <twe, eval, disc>", "Generate a Paper 3 Prompt", false);
+                bldr.addField("r!paper3 <twe, eval, disc> <prompt>", "Generate a Paper 3 Prompt", false);
                 bldr.addBlankField(false);
                 bldr.addField("People who Zak decides only:", "(Erin, Eugenia, Zak, Aaryea)", false);
                 bldr.addField("r!hounds <mentionedUser>", "Releases the hounds", false);
@@ -128,12 +128,14 @@ public class rocketbot extends ListenerAdapter {
                 e.getChannel().sendMessage("https://cdn.discordapp.com/emojis/410317239859019776.gif?v=1").complete();
             }
 
-            if (text.toLowerCase().startsWith("r!paper3 ")) {
+            if (text.toLowerCase().startsWith("r!paper3")) {
                 String[] tokens = text.split(" ");
                 if (tokens.length > 2) {
                     String msg = Arrays.stream(tokens).skip(2).collect(Collectors.joining(" "));
                     String prompttype = (tokens.length >= 2) ? tokens[1] : "ERROR";
+                    System.out.println(prompttype);
                     for (Prompt prompt : prompts) {
+                        System.out.println(prompt.getPrompt());
                         if (prompt.isPrompt(prompttype)) {
                             e.getChannel().sendMessage("\"" + msg + "\" " + "\n" + "\n" + prompt.getPrompt()).complete();
                         }
@@ -147,7 +149,7 @@ public class rocketbot extends ListenerAdapter {
                     for (User user : mentionedUsers) {
                         Member member = guild.getMember(user);
                         String id = member.getUser().getId();
-                        if (id.equals("191367988224458752")) {
+                        if (id.equals(gloriousCreator)) {
                             e.getChannel().sendMessage("You dare release the hounds upon their creator? Foolish.").complete();
                         } else {
                             for (int i = 0; i < 10; i++) {
