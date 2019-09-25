@@ -397,7 +397,6 @@ public class MessageRespond extends ListenerAdapter {
 
     public void clear(GuildMessageReceivedEvent e, String userId, String text) {
         if (trusteds.contains(userId)) {
-            e.getMessage().delete().complete();
             TextChannel c = e.getChannel();
             MessageHistory history = new MessageHistory(c);
             List<Message> msgs;
@@ -405,14 +404,14 @@ public class MessageRespond extends ListenerAdapter {
             String[] tokens = text.split(" ");
             int temp = Integer.parseInt(tokens[1]);
 
-            if (temp > 100) {
+            try {
+                msgs = history.retrievePast(temp + 1).complete();
+                c.deleteMessages(msgs).complete();
+                e.getChannel().sendMessage(temp + " messages successfully deleted!").complete();
+            } catch (IllegalArgumentException ex) {
                 e.getChannel().sendMessage("Please specify a value that is less than 100!").complete();
-            } else {
-                for (int i = 0; i < temp; i++) {
-                    msgs = history.retrievePast(1).complete();
-                    msgs.get(0).delete().complete();
-                }
             }
+
         } else {
             e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
         }
