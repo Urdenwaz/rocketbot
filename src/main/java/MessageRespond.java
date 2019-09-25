@@ -13,14 +13,18 @@ import java.util.stream.Collectors;
 
 public class MessageRespond extends ListenerAdapter {
 
+    private static final String GLORIOUS_CREATOR = "191367988224458752";
+    private static final String PREFIX = "r!";
+    private static File trustedfile = new File("trusteds.txt");
+
     private List<Quote> quotable;
     private List<Quote> notable;
     private List<Prompt> prompts;
     private String design; // allows for design BufferedReader
-    private static final String GLORIOUS_CREATOR = "191367988224458752";
-    private static final String PREFIX = "r!";
     private Set trusteds;
-    private static File trustedfile = new File("trusteds.txt");
+
+    private StackTraceElement[] recentError;
+    private String recentErrorMsg;
 
     public MessageRespond() throws IOException { // reads file so I don't put our design folder online again
         readQuotes();
@@ -197,6 +201,14 @@ public class MessageRespond extends ListenerAdapter {
                     clear(e, userId, text);
                     break;
 
+                case "kill":
+                    kill(e, userId);
+                    break;
+
+                case "errorinfo":
+                    errorInfo(e, userId);
+                    break;
+
                 default:
                     e.getChannel().sendMessage("Give a real command!").complete();
                     break;
@@ -306,6 +318,8 @@ public class MessageRespond extends ListenerAdapter {
             try {
                 x = Integer.parseInt(tokens2[1]);
             } catch (Exception exception) {
+                recentError = exception.getStackTrace();
+                recentErrorMsg = exception.getMessage();
                 e.getChannel().sendMessage("you dun fucked up now kiddo.").complete();
             }
             for (User user : mentionedUsers) {
@@ -330,6 +344,8 @@ public class MessageRespond extends ListenerAdapter {
             try {
                 message.delete().complete();
             } catch (InsufficientPermissionException exception) {
+                recentError = exception.getStackTrace();
+                recentErrorMsg = exception.getMessage();
                 e.getChannel().sendMessage("gimme permissions dumbass.").complete();
             }
 
@@ -371,6 +387,8 @@ public class MessageRespond extends ListenerAdapter {
                 e.getChannel().sendMessage("Give a real name.").complete();
             }
         } catch (NoSuchElementException ex) {
+            recentError = ex.getStackTrace();
+            recentErrorMsg = ex.getMessage();
             e.getChannel().sendMessage("Give a name or else.").complete();
         }
 
@@ -386,6 +404,7 @@ public class MessageRespond extends ListenerAdapter {
 
             bldr.addField("r!hounds <number> <user>", "Releases the hounds on a specific user", false);
             bldr.addField("r!clear <number>", "Clears the specified number of messages", false);
+            bldr.addField("r!kill", "Turns off the bot. Only use in the event of a massive break/bug", false);
 
             bldr.setFooter("Bot created and managed by Zak", null);
 
@@ -409,9 +428,27 @@ public class MessageRespond extends ListenerAdapter {
                 c.deleteMessages(msgs).complete();
                 e.getChannel().sendMessage(temp + " messages successfully deleted!").complete();
             } catch (IllegalArgumentException ex) {
+                recentError = ex.getStackTrace();
+                recentErrorMsg = ex.getMessage();
                 e.getChannel().sendMessage("Please specify a value that is less than 100!").complete();
             }
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
 
+    public void kill(GuildMessageReceivedEvent e, String userId) {
+        if (trusteds.contains(userId)) {
+            e.getChannel().sendMessage("Goodbye, going offline now. Shut down by " + e.getAuthor().getAsMention()).complete();
+            System.exit(-1);
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    public void errorInfo(GuildMessageReceivedEvent e, String userId) {
+        if (userId.equals(GLORIOUS_CREATOR)) {
+            e.getChannel().sendMessage(recentErrorMsg + "\n\n" + Arrays.toString(recentError)).complete();
         } else {
             e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
         }
