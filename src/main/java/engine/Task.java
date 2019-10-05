@@ -61,7 +61,7 @@ public class Task {
             case "asap": this.priority = PRIORITY_CHOICES[0]; break;
             case "week": this.priority = PRIORITY_CHOICES[1]; break;
             case "month": this.priority = PRIORITY_CHOICES[2]; break;
-            case "eventually": this.priority = PRIORITY_CHOICES[3];
+            case "eventually": this.priority = PRIORITY_CHOICES[3]; break;
 
             default: throw new IllegalArgumentException();
         }
