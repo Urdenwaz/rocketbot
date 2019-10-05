@@ -1,10 +1,12 @@
+package engine;
+
 public class Prompt {
 
     private String prompt;
 
     public Prompt(String prompt) {
         this.prompt = prompt;
-        System.out.println("Prompt " + prompt + " loaded");
+        System.out.println("engine.Prompt " + prompt + " loaded");
     }
 
     public boolean isPrompt(String prompt) {

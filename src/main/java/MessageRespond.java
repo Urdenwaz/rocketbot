@@ -1,3 +1,11 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import engine.Prompt;
+import engine.Quote;
+import engine.Task;
+
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -7,6 +15,7 @@ import net.dv8tion.jda.core.managers.GuildController;
 
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,11 +24,15 @@ public class MessageRespond extends ListenerAdapter {
 
     private static final String GLORIOUS_CREATOR = "191367988224458752";
     private static final String PREFIX = "r!";
+    private static final String TASK_PREFIX = "t!";
+    private static final String TASK_FILE = "tasklist.json";
+
     private static File trustedfile = new File("trusteds.txt");
 
     private List<Quote> quotable;
     private List<Quote> notable;
     private List<Prompt> prompts;
+    private List<Task> tasks;
     private String design; // allows for design BufferedReader
     private Set trusteds;
 
@@ -31,10 +44,30 @@ public class MessageRespond extends ListenerAdapter {
         readDesign();
         readPrompts();
         readTrusteds();
+        readTasks();
         System.out.println("Read in " + trusteds.size() + " trusteds.");
     }
 
-    public void readQuotes() throws IOException {
+    private void readTasks() throws IOException {
+        BufferedReader rdr = new BufferedReader(new FileReader(TASK_FILE));
+        Type listType = new TypeToken<ArrayList<Task>>(){}.getType();
+        tasks = new Gson().fromJson(rdr, listType);
+
+        if (tasks == null) {
+            tasks = new ArrayList<>();
+        }
+    }
+
+    private void writeTasks() throws IOException {
+        GsonBuilder bldr = new GsonBuilder().setPrettyPrinting();
+        Gson gson = bldr.create();
+
+        FileWriter wrtr = new FileWriter(new File("tasklist.json"));
+        wrtr.write(gson.toJson(tasks));
+        wrtr.close();
+    }
+
+    private void readQuotes() throws IOException {
         String[] notablenames = { "Aaryea" };
         notable = new ArrayList<>();
         for (int i = 0; i < notablenames.length; i++) {
@@ -49,12 +82,12 @@ public class MessageRespond extends ListenerAdapter {
 
     }
 
-    public void readDesign() throws IOException {
+    private void readDesign() throws IOException {
         BufferedReader rdr = new BufferedReader(new FileReader("designfolder.txt"));
         design = rdr.readLine();
     }
 
-    public void readPrompts() {
+    private void readPrompts() {
         String types[] = { "twe", "eval", "disc" };
         prompts = new ArrayList<>();
         for (int i = 0; i < types.length; i++) {
@@ -62,7 +95,7 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void readTrusteds() throws IOException {
+    private void readTrusteds() throws IOException {
         BufferedReader rdr = new BufferedReader(new FileReader(trustedfile));
         trusteds = new HashSet<String>();
         String line;
@@ -87,13 +120,14 @@ public class MessageRespond extends ListenerAdapter {
             if (!text.contains(" ")) {
                 System.out.println("it worked " + text);
 
-                String temp1 = text.substring(0, 0).toUpperCase();
+                String temp1 = text.substring(0, 1).toUpperCase();
                 String temp2 = text.substring(1).toLowerCase();
                 text = temp1 + temp2;
+                System.out.println(text);
 
                 controller.setNickname(member, text).complete();
                 controller.addSingleRoleToMember(member, guild.getRoleById(583056331049533456L)).complete();
-                channel.sendMessage("**Thank you for verifying your name!**\n\nYou now have access to the rest of the Discord Server.").complete();
+                channel.sendMessage("**Thank you for verifying your name!**\n\nYou now have access to the rest of the Discord Server.\n\nHappy Rocketeering!").complete();
             } else {
                 System.out.println("it didn't work " + text);
                 channel.sendMessage("**Please give a valid name!**\n\n__**Example:**__\n``Zak``\n``Elon``\n``Stephen``").complete();
@@ -103,8 +137,8 @@ public class MessageRespond extends ListenerAdapter {
         if (!userId.equals("504527272061960193")) {
             if (text.toLowerCase().equals("f")  ) {
                 e.getChannel().sendMessage("https://cdn.discordapp.com/emojis/410317239859019776.gif?v=1").complete();
-            } else if (text.toLowerCase().contains("france") ||
-                text.toLowerCase().contains("french")) {
+            } else if (text.toLowerCase().equals("france") ||
+                text.toLowerCase().equals("french")) {
                 e.getChannel().sendMessage("*surrender monkeys").complete();
             }
         }
@@ -126,8 +160,37 @@ public class MessageRespond extends ListenerAdapter {
                 e.getChannel().sendMessage("yes master").complete();
             }
         }
+        if
+        (text.startsWith(TASK_PREFIX)) {
+            Scanner messageInput = new Scanner(text.substring(PREFIX.length()));
+            String command = messageInput.next();
 
-        if (text.startsWith(PREFIX)) {
+            switch (command) {
+                case "help":
+                    taskHelp(e, userId);
+                    break;
+
+                case "create":
+                    createTask(e, text, userId);
+                    break;
+
+                case "delete":
+                    deleteTask(e, text, userId);
+                    break;
+
+                case "save":
+                    save(e, userId);
+                    break;
+
+                case "list":
+                    listTasks(e, userId);
+                    break;
+
+                default:
+                    e.getChannel().sendMessage("Give a real command!").complete();
+                    break;
+            }
+        } else if (text.startsWith(PREFIX)) {
             Scanner messageInput = new Scanner(text.substring(PREFIX.length()));
             String command = messageInput.next();
 
@@ -218,7 +281,7 @@ public class MessageRespond extends ListenerAdapter {
 
     }
 
-    public void help(GuildMessageReceivedEvent e) {
+    private void help(GuildMessageReceivedEvent e) {
         EmbedBuilder bldr = new EmbedBuilder();
 
         bldr.setAuthor("rocketbot Commands", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
@@ -228,7 +291,7 @@ public class MessageRespond extends ListenerAdapter {
         bldr.addField("r!rqdoc", "TARC Requirements Document", false);
         bldr.addField("r!specs", "TARC Rocket Specifications", false);
         bldr.addField("r!openrocket", "Link to OpenRocket", false);
-        bldr.addField("r!paper3 <twe, eval, disc> <prompt>", "Generate a Paper 3 Prompt", false);
+        bldr.addField("r!paper3 <twe, eval, disc> <prompt>", "Generate a Paper 3 engine.Prompt", false);
         bldr.addField("r!dates", "Important Dates", false);
         bldr.addField("r!quote <aaryea, else>", "Gives a random quote", false);
         bldr.addField("r!legacy <launchdata, info, design>", "Legacy Commands from the 2018-19 year", false);
@@ -238,15 +301,15 @@ public class MessageRespond extends ListenerAdapter {
         e.getChannel().sendMessage(bldr.build()).complete();
     }
 
-    public void rqdoc(GuildMessageReceivedEvent e) {
+    private void rqdoc(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("__**TARC Requirements Doc:**__ \nhttps://3384f12ld0l0tjlik1fcm68s-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/Event-Rules-TARC-2019-FINAL.pdf").complete();
     }
 
-    public void openRocket(GuildMessageReceivedEvent e) {
+    private void openRocket(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("http://openrocket.info/").complete();
     }
 
-    public void specs(GuildMessageReceivedEvent e) {
+    private void specs(GuildMessageReceivedEvent e) {
         EmbedBuilder bldr = new EmbedBuilder();
 
         bldr.setAuthor("TARC Rocket Specifications", "https://rocketcontest.org/","https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
@@ -269,11 +332,11 @@ public class MessageRespond extends ListenerAdapter {
         e.getChannel().sendMessage(bldr.build()).complete();
     }
 
-    public void imperial(GuildMessageReceivedEvent e) {
+    private void imperial(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("打倒美帝国主义").complete();
     }
 
-    public void paper3(GuildMessageReceivedEvent e, String text) {
+    private void paper3(GuildMessageReceivedEvent e, String text) {
         String[] tokens = text.split(" ");
         if (tokens.length > 2) {
             String msg = Arrays.stream(tokens).skip(2).collect(Collectors.joining(" "));
@@ -286,11 +349,11 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void legacyDesign(GuildMessageReceivedEvent e) {
+    private void legacyDesign(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("__**Design**__\n" + design).complete();
     }
 
-    public void legacyInfo(GuildMessageReceivedEvent e) {
+    private void legacyInfo(GuildMessageReceivedEvent e) {
         EmbedBuilder bldr = new EmbedBuilder();
 
         bldr.setAuthor("Team Info", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
@@ -306,11 +369,11 @@ public class MessageRespond extends ListenerAdapter {
         e.getChannel().sendMessage(bldr.build()).complete();
     }
 
-    public void legacyLaunchData(GuildMessageReceivedEvent e) {
+    private void legacyLaunchData(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("__**Launch Data:**__\nhttps://docs.google.com/spreadsheets/d/1-AmNGxfYK_w8szDZ4_q8ZvgIo_il2fcmgZHNkt5BrVY/edit#gid=0").complete();
     }
 
-    public void hounds(GuildMessageReceivedEvent e, String userId, String text, Message message, Guild guild) {
+    private void hounds(GuildMessageReceivedEvent e, String userId, String text, Message message, Guild guild) {
         if (trusteds.contains(userId)) {
             String[] tokens2 = text.split(" ");
             List<User> mentionedUsers = message.getMentionedUsers();
@@ -337,7 +400,7 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void say(GuildMessageReceivedEvent e, String userId, String text, Message message) {
+    private void say(GuildMessageReceivedEvent e, String userId, String text, Message message) {
         if (userId.equals(GLORIOUS_CREATOR)) {
             String[] tokens3 = text.split(" ");
 
@@ -358,14 +421,14 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void dates(GuildMessageReceivedEvent e) {
+    private void dates(GuildMessageReceivedEvent e) {
         e.getChannel().sendMessage("__**Important Dates:**__\n" +
                 "September 1, 2019 - Team Registration\n" +
                 "April 6, 2020 - Flight Scores Due\n" +
                 "May 16, 2020 - Nationals").complete();
     }
 
-    public void quote(GuildMessageReceivedEvent e, Scanner tokens) {
+    private void quote(GuildMessageReceivedEvent e, Scanner tokens) {
         boolean success = false;
         try {
             String name = tokens.next();
@@ -394,7 +457,7 @@ public class MessageRespond extends ListenerAdapter {
 
     }
 
-    public void adminHelp(GuildMessageReceivedEvent e, String userId) {
+    private void adminHelp(GuildMessageReceivedEvent e, String userId) {
         if (trusteds.contains(userId)) {
             EmbedBuilder bldr = new EmbedBuilder();
 
@@ -405,6 +468,8 @@ public class MessageRespond extends ListenerAdapter {
             bldr.addField("r!hounds <number> <user>", "Releases the hounds on a specific user", false);
             bldr.addField("r!clear <number>", "Clears the specified number of messages", false);
             bldr.addField("r!kill", "Turns off the bot. Only use in the event of a massive break/bug", false);
+            bldr.addField("t!help", "Gives help for Task commands", false);
+            bldr.addField("r!errorinfo (Zak Only)", "Retrieves info of last thrown exception", false);
 
             bldr.setFooter("Bot created and managed by Zak", null);
 
@@ -414,7 +479,7 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void clear(GuildMessageReceivedEvent e, String userId, String text) {
+    private void clear(GuildMessageReceivedEvent e, String userId, String text) {
         if (trusteds.contains(userId)) {
             TextChannel c = e.getChannel();
             MessageHistory history = new MessageHistory(c);
@@ -437,18 +502,136 @@ public class MessageRespond extends ListenerAdapter {
         }
     }
 
-    public void kill(GuildMessageReceivedEvent e, String userId) {
+    private void kill(GuildMessageReceivedEvent e, String userId) {
         if (trusteds.contains(userId)) {
             e.getChannel().sendMessage("Goodbye, going offline now. Shut down by " + e.getAuthor().getAsMention()).complete();
+            try {
+                writeTasks();
+            } catch (IOException ex) {
+                System.out.println("fuck");
+            }
             System.exit(-1);
         } else {
             e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
         }
     }
 
-    public void errorInfo(GuildMessageReceivedEvent e, String userId) {
+    private void errorInfo(GuildMessageReceivedEvent e, String userId) {
         if (userId.equals(GLORIOUS_CREATOR)) {
             e.getChannel().sendMessage(recentErrorMsg + "\n\n" + Arrays.toString(recentError)).complete();
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    private void save(GuildMessageReceivedEvent e, String userId) {
+        if (trusteds.contains(userId)) {
+            try {
+                writeTasks();
+                e.getChannel().sendMessage("Tasks successfully saved!").complete();
+            } catch (IOException ex) {
+                recentError = ex.getStackTrace();
+                recentErrorMsg = ex.getMessage();
+                e.getChannel().sendMessage("Something went wrong, tasks not saved.").complete();
+            }
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    private void listTasks(GuildMessageReceivedEvent e, String userId) {
+        if (trusteds.contains(userId)) {
+            if (tasks.isEmpty()) {
+                e.getChannel().sendMessage("No tasks are currently saved.").complete();
+            } else {
+                EmbedBuilder bldr = new EmbedBuilder();
+
+                bldr.setAuthor("Task List", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+                bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+                bldr.setColor(Color.magenta);
+
+                for (Task t : tasks) {
+                    bldr.addField("Task: " + t.getTaskName(), "Responsible: " + t.getResponsible() + ", Priority: " + t.getPriority(),false);
+                }
+
+                bldr.setFooter("Bot created and managed by Zak", null);
+
+                e.getChannel().sendMessage(bldr.build()).complete();
+            }
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    private void taskHelp(GuildMessageReceivedEvent e, String userId) {
+        if (trusteds.contains(userId)) {
+            EmbedBuilder bldr = new EmbedBuilder();
+
+            bldr.setAuthor("Task Help", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+            bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+            bldr.setColor(Color.cyan);
+
+            bldr.addField("t!create <responsible person, priority factor, task name>", "Creates a task", false);
+            bldr.addField("t!delete <task name>", "Deletes a task from the list", false);
+            bldr.addField("t!save", "Saves all tasks to the storage file", false);
+            bldr.addField("t!list", "Lists all current stored tasks", false);
+
+            bldr.addBlankField(false);
+
+            bldr.addField("Priority Factors:", "a, w, m, e, asap, week, month, eventually", false);
+
+            bldr.setFooter("Bot created and managed by Zak", null);
+
+            e.getChannel().sendMessage(bldr.build()).complete();
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    private void createTask(GuildMessageReceivedEvent e, String text, String userId) {
+        boolean success = false;
+        if (trusteds.contains(userId)) {
+            String[] tokens = text.split(" ");
+            String name = Arrays.stream(tokens).skip(3).collect(Collectors.joining(" "));
+            String responsible = tokens[1];
+            String priority = tokens[2];
+
+            System.out.println("n: " + name);
+            System.out.println("r: " + responsible);
+            System.out.println("p: " + priority);
+            try {
+                tasks.add(new Task(name, responsible, priority));
+                success = true;
+            } catch (IllegalArgumentException ex) {
+                recentError = ex.getStackTrace();
+                recentErrorMsg = ex.getMessage();
+                e.getChannel().sendMessage("Error: Task not saved.").complete();
+            }
+            if (success) {
+                e.getChannel().sendMessage("Task successfully saved!").complete();
+            }
+        } else {
+            e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
+        }
+    }
+
+    private void deleteTask(GuildMessageReceivedEvent e, String text, String userId) {
+        String[] tokens = text.split(" ");
+        String name = Arrays.stream(tokens).skip(1).collect(Collectors.joining(" "));
+        boolean success = false;
+        if (trusteds.contains(userId)) {
+            for (Task t : tasks) {
+                if (t.isMe(name)) {
+                    tasks.remove(t);
+                    success = true;
+                    break;
+                }
+            }
+            if (!success) {
+                e.getChannel().sendMessage("Task did not exist!").complete();
+            } else {
+                e.getChannel().sendMessage("Task successfully removed!").complete();
+            }
         } else {
             e.getChannel().sendMessage("You do not wield enough power for this command!").complete();
         }

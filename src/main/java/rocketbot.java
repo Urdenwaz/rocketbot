@@ -38,9 +38,9 @@ public class rocketbot extends ListenerAdapter {
         bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/626292355691053056/1200px-Waffles_with_Strawberries.png");
         bldr.setColor(Color.RED);
 
-        bldr.addField("Hello, and welcome to the Skyline Rocketry Club Discord!","Please message your first name in the #give-name channel.", false);
+        bldr.addField("Hello, and welcome to the Skyline Rocketry Club Discord!","Please message your first name in the ``#give-name`` channel.", false);
         bldr.addBlankField(false);
-        bldr.addField("Bot Help:", "Once you are confirmed, use r!help in #bot for bot commands", false);
+        bldr.addField("Bot Help:", "Once you are confirmed, use r!help in ``#bot`` for bot commands, or message one of the board members if you have any questions.", false);
         bldr.setFooter("Bot created by Zak", "https://cdn.discordapp.com/attachments/191585321522036746/504686161189535764/image0.jpg");
 
         channel.sendMessage(bldr.build()).complete();
