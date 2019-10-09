@@ -1,6 +1,11 @@
 package engine;
 
-public class Task {
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+
+import java.awt.*;
+
+public class Task implements Embedabble {
 
     private String taskName;
     private String responsible;
@@ -25,6 +30,23 @@ public class Task {
 
             default: throw new IllegalArgumentException();
         }
+    }
+
+    @Override
+    public MessageEmbed displayInfo() {
+        EmbedBuilder bldr = new EmbedBuilder();
+
+        bldr.setAuthor("Task Info", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+        bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+        bldr.setColor(Color.blue);
+
+        bldr.addField("Task: ", taskName, false);
+        bldr.addField("Responsible Person(s): ", responsible, false);
+        bldr.addField("Priority: ", priority, false);
+
+        bldr.setFooter("Bot created and managed by Zak", null);
+
+        return bldr.build();
     }
 
     public boolean isMe(String taskName) {

@@ -140,7 +140,7 @@ public class MessageRespond extends ListenerAdapter {
     }
 
     private void readTrusteds() throws IOException {
-        BufferedReader rdr = new BufferedReader(new FileReader("trustedfile.txt"));
+        BufferedReader rdr = new BufferedReader(new FileReader("trusteds.txt"));
         trusteds = new HashSet<String>();
         String line;
         while ((line = rdr.readLine()) != null) {
@@ -791,7 +791,7 @@ public class MessageRespond extends ListenerAdapter {
         boolean success = false;
         for (Task t : tasks) {
             if (t.isMe(name)) {
-                channel.sendMessage(displayTask(t)).complete();
+                channel.sendMessage(t.displayInfo()).complete();
                 success = true;
                 break;
             }
@@ -799,22 +799,6 @@ public class MessageRespond extends ListenerAdapter {
         if (!success) {
             channel.sendMessage("Error: Task not found.").complete();
         }
-    }
-
-    private MessageEmbed displayTask(Task t) {
-        EmbedBuilder bldr = new EmbedBuilder();
-
-        bldr.setAuthor("Task Info", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
-        bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
-        bldr.setColor(Color.blue);
-
-        bldr.addField("Task: ", t.getTaskName(), false);
-        bldr.addField("Responsible Person(s): ", t.getResponsible(), false);
-        bldr.addField("Priority: ", t.getPriority(), false);
-
-        bldr.setFooter("Bot created and managed by Zak", null);
-
-        return bldr.build();
     }
 
     private void updateTaskList(Guild guild) {
@@ -947,7 +931,7 @@ public class MessageRespond extends ListenerAdapter {
         boolean success = false;
         for (Purchase p : purchases) {
             if (p.isMe(name)) {
-                channel.sendMessage(displayPurchase(p)).complete();
+                channel.sendMessage(p.displayInfo()).complete();
                 success = true;
                 break;
             }
@@ -955,23 +939,6 @@ public class MessageRespond extends ListenerAdapter {
         if (!success) {
             channel.sendMessage("Error: Purchase not found.").complete();
         }
-    }
-
-    private MessageEmbed displayPurchase(Purchase p) {
-        EmbedBuilder bldr = new EmbedBuilder();
-
-        bldr.setAuthor("Purchase Info", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
-        bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
-        bldr.setColor(Color.green);
-
-        bldr.addField("Part Name:", p.getName(), false);
-        bldr.addField("Part Amount:", p.getAmount() + "", false);
-        bldr.addField("Cost per Unit:", "$" +p.getCostPerUnit(), false);
-        bldr.addField("Total Cost:", "$" + p.getTotalCost(), false);
-
-        bldr.setFooter("Bot created and managed by Zak", null);
-
-        return bldr.build();
     }
 
     private void addPurchase(TextChannel channel, String text, Guild guild) {

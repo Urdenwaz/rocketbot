@@ -1,8 +1,12 @@
 package engine;
 
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+
+import java.awt.*;
 import java.text.DecimalFormat;
 
-public class Purchase {
+public class Purchase implements Embedabble {
 
     private String name;
     private int amount;
@@ -48,6 +52,24 @@ public class Purchase {
 
     public boolean isMe(String purchaseName) {
         return this.name.equalsIgnoreCase(purchaseName.trim());
+    }
+
+    @Override
+    public MessageEmbed displayInfo() {
+        EmbedBuilder bldr = new EmbedBuilder();
+
+        bldr.setAuthor("Purchase Info", "https://github.com/Urdenwaz/rocketbot", "https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+        bldr.setThumbnail("https://cdn.discordapp.com/attachments/499820723192463370/504725105889378304/rocket.png");
+        bldr.setColor(Color.green);
+
+        bldr.addField("Part Name:", name, false);
+        bldr.addField("Part Amount:", amount + "", false);
+        bldr.addField("Cost per Unit:", "$" + costPerUnit, false);
+        bldr.addField("Total Cost:", "$" + totalCost, false);
+
+        bldr.setFooter("Bot created and managed by Zak", null);
+
+        return bldr.build();
     }
 
     @Override
