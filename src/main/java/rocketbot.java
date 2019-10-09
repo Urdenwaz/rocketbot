@@ -7,24 +7,29 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
-import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class rocketbot extends ListenerAdapter {
 
+    public static MessageRespond mainMessageRespond;
+
     public static void main(String[] args) throws LoginException, IOException { // creates bot, should be left untouched
+        mainMessageRespond = new MessageRespond();
         try (BufferedReader rdr = new BufferedReader(new FileReader("token.txt"))) {
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(rdr.readLine())
                     .setGame(Game.playing("type r!help for commands"))
                     .addEventListener(new rocketbot())
-                    .addEventListener(new MessageRespond())
+                    .addEventListener(mainMessageRespond)
                     .build();
             String invite = jda.asBot().getInviteUrl();
             System.out.println(invite);
         }
+        ConsoleThread thread = new ConsoleThread();
+        thread.start();
     }
 
     @Override
