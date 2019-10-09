@@ -17,7 +17,7 @@ public class ConsoleThread extends Thread {
                     rocketbot.mainMessageRespond.sayChannel.sendMessage(input).complete();
                 }
             } catch (Exception e) {
-                System.out.println("you fucked up");
+                System.out.println("Exception Caught.");
             }
         }
     }
